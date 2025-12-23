@@ -1,7 +1,9 @@
+# analyze_prompt_trajectories.py
 import pandas as pd
 from convokit import Corpus
 
-CORPUS_DIR = "prompt_only_corpus_annotated"
+CORPUS_DIR = r"C:\Users\Ali\.convokit\saved-corpora\prompt_only_corpus_annotated"
+
 
 corpus = Corpus(filename=CORPUS_DIR)
 

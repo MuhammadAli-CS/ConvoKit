@@ -1,13 +1,18 @@
-
 import json
-from convokit import Corpus, Utterance, Speaker
 import uuid
+from convokit import Corpus, Utterance, Speaker
 
-PATH = "formal1_logs.json"  # <-- your parsed actions JSON
-OUT = "prompt_only_corpus"  # folder ConvoKit will write
+PATH = "original.json"
+OUT = "prompt_only_corpus"
+
+AI_TRIGGER_TYPES = {
+    "present_suggestion",
+    "chat_suggestion_get",
+    "chat_suggestion_open",
+    "accept_suggestion",
+}
 
 def extract_text_from_textdelta(action_logs):
-    """Best-effort extraction of inserted text from Quill-style ops."""
     pieces = []
     for lg in action_logs or []:
         td = lg.get("textDelta")
@@ -20,61 +25,69 @@ def extract_text_from_textdelta(action_logs):
     return "".join(pieces).strip()
 
 def extract_prompt_text(action):
-    # 1) action_delta format like ["INSERT", "<text>", ...]
-    ad = action.get("action_delta")
-    if isinstance(ad, list) and len(ad) >= 2 and isinstance(ad[1], str) and ad[1].strip():
-        return ad[1].strip()
-
-    # 2) some parsers store full chat state
     aecw = action.get("action_end_chat_writing")
     if isinstance(aecw, str) and aecw.strip():
         return aecw.strip()
 
-    # 3) fallback: reconstruct from logs
-    txt = extract_text_from_textdelta(action.get("action_logs"))
-    return txt
+    ad = action.get("action_delta")
+    if isinstance(ad, list) and len(ad) >= 2 and isinstance(ad[1], str) and ad[1].strip():
+        return ad[1].strip()
 
-def is_prompt_action(action):
-    # adjust this if your dataset uses a different name
-    return action.get("action_source") == "user" and action.get("level_1_action_type") == "chat_insert"
+    return extract_text_from_textdelta(action.get("action_logs"))
 
-with open(PATH, "r") as f:
-    actions_per_session = json.load(f)
+def is_prompt_action(actions, i):
+    a = actions[i]
+    if not (a.get("action_source") == "user" and a.get("level_1_action_type") == "chat_insert"):
+        return False
 
-user = Speaker(id="user")
-utterances = []
-conversations = []
+    # keep only prompts that trigger an AI event next
+    if i + 1 < len(actions):
+        nxt = actions[i + 1]
+        if nxt.get("action_source") == "api":
+            return True
+        if nxt.get("level_1_action_type") in AI_TRIGGER_TYPES:
+            return True
+    return False
 
-num_prompts = 0
+def main():
+    with open(PATH, "r", encoding="utf-8") as f:
+        actions_per_session = json.load(f)
 
-for session_id, actions in actions_per_session.items():
-    convo_utt_ids = []
-    for i, a in enumerate(actions):
-        if not is_prompt_action(a):
-            continue
-        text = extract_prompt_text(a)
-        if not text:
-            continue
+    user = Speaker(id="user")
+    utterances = []
+    sessions_with_prompts = set()
 
-        utt = Utterance(
-            id=str(uuid.uuid4()),
-            speaker=user,
-            text=text,
-            conversation_id=session_id
-        )
-        utt.add_meta("session_id", session_id)
-        utt.add_meta("action_index", i)
-        utt.add_meta("start_time", a.get("action_start_time"))
-        utt.add_meta("end_time", a.get("action_end_time"))
+    for session_id, actions in actions_per_session.items():
+        for i, a in enumerate(actions):
+            if not is_prompt_action(actions, i):
+                continue
 
-        utterances.append(utt)
-        convo_utt_ids.append(utt.id)
-        num_prompts += 1
+            text = extract_prompt_text(a)
+            if not text:
+                continue
 
-    if convo_utt_ids:
-        conversations.append((session_id, convo_utt_ids))
+            utt = Utterance(
+                id=str(uuid.uuid4()),
+                speaker=user,
+                text=text,
+                conversation_id=session_id
+            )
+            utt.add_meta("session_id", session_id)
+            utt.add_meta("action_index", i)
+            utt.add_meta("start_time", a.get("action_start_time"))
+            utt.add_meta("end_time", a.get("action_end_time"))
 
-corpus = Corpus(utterances=utterances, speakers=[user], conversations=conversations)
-corpus.dump(OUT)
+            utterances.append(utt)
+            sessions_with_prompts.add(session_id)
 
-print(f"✅ Built corpus '{OUT}' with {num_prompts} prompts across {len(conversations)} sessions.")
+    # IMPORTANT: initialize with utterances so internal storage exists
+    corpus = Corpus(utterances=[])
+
+    # add in one batch
+    corpus.add_utterances(utterances)
+
+    corpus.dump(OUT)
+    print(f"✅ Built corpus '{OUT}' with {len(utterances)} prompts across {len(sessions_with_prompts)} sessions.")
+
+if __name__ == "__main__":
+    main()

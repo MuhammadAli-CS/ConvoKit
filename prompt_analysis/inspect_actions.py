@@ -1,7 +1,8 @@
+# inspect_actions.py
 import json
 from collections import Counter
 
-PATH = "formal1_logs.json"  # <-- your parsed actions JSON
+PATH = "original.json"  # <-- your parsed actions JSON
 
 with open(PATH, "r") as f:
     actions_per_session = json.load(f)

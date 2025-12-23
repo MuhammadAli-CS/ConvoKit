@@ -1,12 +1,13 @@
+# annotate_prompts.py
 import re
 from convokit import Corpus
 
-CORPUS_DIR = "prompt_only_corpus"
+CORPUS_DIR = r"C:\Users\Ali\.convokit\saved-corpora\prompt_only_corpus"
 OUT_DIR = "prompt_only_corpus_annotated"
 
 INTENT_PATTERNS = {
     "idea_generation": [r"\bbrainstorm\b", r"\bmore (ideas|angles|perspectives)\b", r"\balternatives?\b", r"\bexpand\b"],
-    "clarification":   [r"\bwhat do you mean\b", r"\bexplain\b", r"\bclarify\b", r"\bwhy\b"],
+    "explain_or_clarify":   [r"\bwhat do you mean\b", r"\bexplain\b", r"\bclarify\b", r"\bwhy\b"],
     "validation":      [r"\bis this (correct|right)\b", r"\bdoes this make sense\b", r"\bam i right\b"],
     "delegation":      [r"\bwrite\b", r"\bdraft\b", r"\bgenerate\b", r"\bgive me\b"],
     "critique":        [r"\bwhat('s| is) wrong\b", r"\bweakness(es)?\b", r"\bcounterargument\b", r"\bcritic\b"],
