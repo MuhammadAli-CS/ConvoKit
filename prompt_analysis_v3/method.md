@@ -1,0 +1,7 @@
+We analyze user prompts from CoAuthor writing sessions by first parsing raw interaction logs into structured action sequences. We identify user-issued prompts as actions with type chat_insert and source user, and extract their textual content along with precise timestamps.
+
+Each prompt is treated as a single utterance in a ConvoKit corpus, with writing sessions corresponding to conversations. Prompts are ordered temporally and indexed both by discrete turn number and normalized session time to enable cross-session comparison.
+
+To quantify prompt specificity, we introduce a syntactic specificity metric derived from spaCy’s dependency parser. Rather than relying on hand-crafted word lists or supervised labels, we compute prompt-level structural features, including adjective density, noun density (including proper nouns), numeric constraint density, and negation markers. These features are combined linearly into a single specificity score, yielding an interpretable, domain-agnostic measure of instruction constraint.
+
+In addition, we annotate prompts with lightweight interactional markers (prompt length, hedging, and refinement intent) for descriptive and validation purposes. These markers are not used to compute specificity, but serve to contextualize prompt trajectories and validate observed trends.
