@@ -39,4 +39,5 @@ venv-triadmotif/
 *.tsv
 !/docs/source/img/*
 env/
-prompt_analysis/.venv
+prompt_analysis_v2/.venv/*
+prompt_analysis/.venv/*

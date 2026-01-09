@@ -16,16 +16,18 @@ def build_trajectory_dataframe(corpus: Corpus) -> pd.DataFrame:
             rows.append({
                 "conversation_id": convo.id,
                 "timestep": t,
+                "text": u.text,  #  REQUIRED for scikit-learn
                 "prompt_intent": u.meta.get("prompt_intent_v2", "other"),
                 "meta_cognitive": bool(u.meta.get("meta_cognitive", False)),
                 "hedging": bool(u.meta.get("hedging", False)),
                 "certainty": bool(u.meta.get("certainty", False)),
                 "authority_transfer": bool(u.meta.get("authority_transfer", False)),
                 "refinement": bool(u.meta.get("refinement", False)),
-                "prompt_length": int(u.meta.get("prompt_length", 0) or 0),
-                "num_constraints": int(u.meta.get("num_constraints", 0) or 0),
+                "prompt_length": int(u.meta.get("prompt_length", 0) or len(u.text.split())),
+                "num_constraints": int(u.meta.get("num_constraints", 0) or 0),  # weak label
                 "descriptive_words": int(u.meta.get("descriptive_words", 0) or 0),
             })
+
 
     df = pd.DataFrame(rows)
 

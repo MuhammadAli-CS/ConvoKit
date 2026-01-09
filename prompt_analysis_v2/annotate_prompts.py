@@ -38,10 +38,11 @@ META_COG = [
 
 # ---- constraint lexicon (seed; expand later) ----
 CONSTRAINT_TERMS = [
-    r"\bmust\b", r"\bshould\b", r"\bdon't\b", r"\bdo not\b", r"\bavoid\b", r"\brequire\b",
-    r"\bneed(s)? to\b", r"\binclude\b", r"\bexclude\b", r"\bno\b(?!\s+idea)", r"\bwithout\b",
-    r"\bonly\b", r"\bat least\b", r"\bat most\b", r"\bexactly\b",
-    r"\bformat\b", r"\bstructure\b", r"\bword limit\b", r"\bmax\b", r"\bminimum\b",
+    r"\bmust\b", r"\bwill\b", r"\bwould\b", r"\bshould\b", r"\bdon't\b", r"\bdo not\b", r"\bavoid\b",
+    r"\bneed(s)? to\b", r"\binclude\b", r"\bexclude\b", r"\bno\b(?!\s+idea)", r"\bwithout\b", r"\bmay\b",
+    r"\bonly\b", r"\bat least\b", r"\bat most\b", r"\bexactly\b", r"\brequire\b", r"\blimit\b",
+    r"\bformat\b", r"\bstructure\b", r"\bword limit\b", r"\bmaximum\b", r"\bcan\b", r"\bminimum\b",
+    r"\bcould\b", r"\bshall\b"
 ]
 
 # “descriptive words” = adjectives-ish proxy (cheap)

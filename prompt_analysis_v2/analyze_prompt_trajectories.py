@@ -33,7 +33,8 @@ def main():
                 "prompt_length": int(u.meta.get("prompt_length", 0) or 0),
                 "num_constraints_rule": int(u.meta.get("num_constraints_rule", 0) or 0),
                 "descriptive_words": int(u.meta.get("descriptive_words", 0) or 0),
-                "t_norm": (t / (n - 1)) if n > 1 else 0.0
+                "t_norm": (t / (n - 1)) if n > 1 else 0.0,
+                "text": u.text,
             })
 
     df = pd.DataFrame(rows)
